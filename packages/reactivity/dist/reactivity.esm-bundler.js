@@ -1,8 +1,63 @@
 const isObject = (value) => typeof value === 'object' && value != null;
+const isArray = Array.isArray;
+const isIntegerKey = (key) => parseInt(key) + '' === key;
+const hasOwn = (target, key) => Object.prototype.hasOwnProperty.call(target, key);
+
+// vue2.0 watcher
+function effect(fn, options = {}) {
+    const effect = createReactiveEffect(fn, options);
+    if (!options.lazy)
+        effect();
+    return effect;
+}
+let uid = 0;
+let activeEffect;
+const effectStack = [];
+function createReactiveEffect(fn, options) {
+    const effect = function reactiveEffect() {
+        if (!effectStack.includes(effect)) {
+            try {
+                effectStack.push(effect);
+                activeEffect = effect;
+                return fn(); // fn 执行完才会去清除 effectStack 中的 effect，而 fn 执行时会进行 track 操作，所以 track 方法中的 activeEffect 永远都是当前运行的函数
+            }
+            finally {
+                effectStack.pop();
+                activeEffect = effectStack[effectStack.length - 1];
+            }
+        }
+    };
+    effect.id = uid++;
+    effect._isEffect = true;
+    effect.raw = fn;
+    effect.options = options;
+    return effect;
+}
+const targetMap = new WeakMap;
+function track(target, type, key) {
+    if (activeEffect == undefined) {
+        return;
+    }
+    let depsMap = targetMap.get(target);
+    if (!depsMap) {
+        targetMap.set(target, (depsMap = new Map));
+    }
+    let deps = depsMap.get(key);
+    if (!deps) {
+        depsMap.set(key, deps = new Set);
+    }
+    if (!deps.has(activeEffect)) {
+        deps.add(activeEffect);
+    }
+}
 
 function createGetter(isReadonly = false, isShallow = false) {
     return function get(target, key, receiver) {
         const result = Reflect.get(target, key, receiver);
+        if (!isReadonly) {
+            // 依赖收集
+            track(target, 0 /* GET */, key);
+        }
         if (isShallow) {
             return result;
         }
@@ -15,6 +70,8 @@ function createGetter(isReadonly = false, isShallow = false) {
 function createSetter(isShallow = false) {
     return function set(target, key, value, receiver) {
         const result = Reflect.set(target, key, value, receiver);
+        isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key);
+        // isArray
         return result;
     };
 }
@@ -47,7 +104,6 @@ const shallowReadonlyHandlers = {
 
 const reactiveMap = new WeakMap, readonlyMap = new WeakMap;
 function createReactiveObject(target, isReadonly, baseHandlers) {
-    console.log('取值');
     if (!isObject(target)) {
         return target;
     }
@@ -74,5 +130,5 @@ function shallowReadonly(target) {
     return createReactiveObject(target, true, shallowReadonlyHandlers);
 }
 
-export { reactive, readonly, shallowReactive, shallowReadonly };
+export { effect, reactive, readonly, shallowReactive, shallowReadonly };
 //# sourceMappingURL=reactivity.esm-bundler.js.map

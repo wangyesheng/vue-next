@@ -9,7 +9,6 @@ import {
 const reactiveMap = new WeakMap, readonlyMap = new WeakMap
 
 function createReactiveObject(target: any, isReadonly: boolean, baseHandlers: any) {
-    console.log('取值')
     if (!isObject(target)) {
         return target
     }

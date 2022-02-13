@@ -17,7 +17,10 @@ async function build(target) {
     await execa('rollup',
         // `-c` 执行 rollup 配置文件
         // `-wc` 执行并监控 rollup 配置文件
-        ['-c', '--environment', [`TARGET:${target}`]], {
+        ['-wc', '--environment', [
+            // 环境变量的一些参数信息
+            `TARGET:${target}`
+        ]], {
             stdio: 'inherit' // 将子进程打包的信息共享给父进程
         }
     )

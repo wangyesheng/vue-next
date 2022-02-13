@@ -1,4 +1,6 @@
-import { isObject } from "@vue/shared"
+import { hasOwn, isArray, isIntegerKey, isObject } from "@vue/shared"
+import { track } from "./effect"
+import { TrackOpTypes } from "./operators"
 import { readonly, reactive } from "./reactive"
 
 function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
@@ -6,6 +8,7 @@ function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
         const result = Reflect.get(target, key, receiver)
         if (!isReadonly) {
             // 依赖收集
+            track(target, TrackOpTypes.GET, key)
         }
 
         if (isShallow) {
@@ -23,6 +26,9 @@ function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
 function createSetter(isShallow: boolean = false) {
     return function set(target: object, key: PropertyKey, value: any, receiver: any) {
         const result = Reflect.set(target, key, value, receiver)
+
+        const hadKey = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key)
+        // isArray
 
         return result
     }
