@@ -1,6 +1,6 @@
 import { hasOwn, isArray, isIntegerKey, isObject } from "@vue/shared"
-import { track } from "./effect"
-import { TrackOpTypes } from "./operators"
+import { track, trigger } from "./effect"
+import { TrackOpTypes, TriggerOpTypes } from "./operators"
 import { readonly, reactive } from "./reactive"
 
 function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
@@ -23,12 +23,28 @@ function createGetter(isReadonly: boolean = false, isShallow: boolean = false) {
     }
 }
 
+// 任意属性
+interface ITarget {
+    [key: PropertyKey]: any
+}
 function createSetter(isShallow: boolean = false) {
-    return function set(target: object, key: PropertyKey, value: any, receiver: any) {
+    return function set(target: ITarget, key: PropertyKey, value: any, receiver: any) {
+        const oldValue = target[key]
+        const hadKey =
+            // 是数组并且是修改数组索引
+            isArray(target) && isIntegerKey(key) ?
+                Number(key) < target.length :
+                hasOwn(target, key)
+
         const result = Reflect.set(target, key, value, receiver)
 
-        const hadKey = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key)
-        // isArray
+        if (!hadKey) {
+            // ADD
+            trigger(target, TriggerOpTypes.ADD, key, value)
+        } else if (oldValue !== value) {
+            // EDIT
+            trigger(target, TriggerOpTypes.UPDATE, key, value, oldValue)
+        }
 
         return result
     }

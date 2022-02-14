@@ -1,4 +1,5 @@
-import { TrackOpTypes } from "./operators"
+import { isArray, isIntegerKey } from "@vue/shared"
+import { TrackOpTypes, TriggerOpTypes } from "./operators"
 
 interface IEffectOptions {
     lazy?: boolean
@@ -39,9 +40,7 @@ function createReactiveEffect(fn: any, options: IEffectOptions) {
 
 const targetMap = new WeakMap
 function track(target: object, type: TrackOpTypes, key: PropertyKey) {
-    if (activeEffect == undefined) {
-        return
-    }
+    if (activeEffect == undefined) return
 
     let depsMap = targetMap.get(target)
     if (!depsMap) {
@@ -58,9 +57,52 @@ function track(target: object, type: TrackOpTypes, key: PropertyKey) {
     }
 }
 
+function trigger(
+    target: object,
+    type: TriggerOpTypes,
+    key: PropertyKey,
+    newValue: any,
+    oldValue?: any
+) {
+    debugger
+    const depsMap = targetMap.get(target)
+    // console.log(target, type, key, newValue, oldValue, targetMap)
+    if (!depsMap) return
+
+    const effects = new Set
+    const add = (effectToAdd: Set<any>) => {
+        effectToAdd.forEach(effect => effects.add(effect))
+    }
+
+    if (isArray(target)) {
+        if (key === 'length') {
+            depsMap.forEach((deps: any, _key: any) => {
+                if (_key == 'length' ||
+                    // 如果更改的长度小于收集的数组索引值，那么这个索引也需要触发 effect 重新执行
+                    (typeof _key !== 'symbol' && _key > newValue)
+                ) {
+                    add(deps)
+                }
+            })
+        }
+
+        if (type == TriggerOpTypes.ADD && isIntegerKey(key)) {
+            add(depsMap.get('length'))
+        }
+    } else {
+        if (key !== undefined) {
+            const deps = depsMap.get(key)
+            if (deps) add(deps)
+        }
+    }
+
+    effects.forEach((effect: any) => effect())
+}
+
 export {
     effect,
-    track
+    track,
+    trigger
 }
 
 

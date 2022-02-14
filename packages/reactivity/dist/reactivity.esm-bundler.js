@@ -35,9 +35,8 @@ function createReactiveEffect(fn, options) {
 }
 const targetMap = new WeakMap;
 function track(target, type, key) {
-    if (activeEffect == undefined) {
+    if (activeEffect == undefined)
         return;
-    }
     let depsMap = targetMap.get(target);
     if (!depsMap) {
         targetMap.set(target, (depsMap = new Map));
@@ -49,6 +48,39 @@ function track(target, type, key) {
     if (!deps.has(activeEffect)) {
         deps.add(activeEffect);
     }
+}
+function trigger(target, type, key, newValue, oldValue) {
+    debugger;
+    const depsMap = targetMap.get(target);
+    // console.log(target, type, key, newValue, oldValue, targetMap)
+    if (!depsMap)
+        return;
+    const effects = new Set;
+    const add = (effectToAdd) => {
+        effectToAdd.forEach(effect => effects.add(effect));
+    };
+    if (isArray(target)) {
+        if (key === 'length') {
+            depsMap.forEach((deps, _key) => {
+                if (_key == 'length' ||
+                    // 如果更改的长度小于收集的数组索引值，那么这个索引也需要触发 effect 重新执行
+                    (typeof _key !== 'symbol' && _key > newValue)) {
+                    add(deps);
+                }
+            });
+        }
+        if (type == 0 /* ADD */ && isIntegerKey(key)) {
+            add(depsMap.get('length'));
+        }
+    }
+    else {
+        if (key !== undefined) {
+            const deps = depsMap.get(key);
+            if (deps)
+                add(deps);
+        }
+    }
+    effects.forEach((effect) => effect());
 }
 
 function createGetter(isReadonly = false, isShallow = false) {
@@ -69,9 +101,21 @@ function createGetter(isReadonly = false, isShallow = false) {
 }
 function createSetter(isShallow = false) {
     return function set(target, key, value, receiver) {
+        const oldValue = target[key];
+        const hadKey = 
+        // 是数组并且是修改数组索引
+        isArray(target) && isIntegerKey(key) ?
+            Number(key) < target.length :
+            hasOwn(target, key);
         const result = Reflect.set(target, key, value, receiver);
-        isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn(target, key);
-        // isArray
+        if (!hadKey) {
+            // ADD
+            trigger(target, 0 /* ADD */, key, value);
+        }
+        else if (oldValue !== value) {
+            // EDIT
+            trigger(target, 1 /* UPDATE */, key, value);
+        }
         return result;
     };
 }

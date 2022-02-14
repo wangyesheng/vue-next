@@ -2,6 +2,12 @@ const enum TrackOpTypes {
     GET
 }
 
+const enum TriggerOpTypes {
+    ADD,
+    UPDATE
+}
+
 export {
-    TrackOpTypes
+    TrackOpTypes,
+    TriggerOpTypes
 }
