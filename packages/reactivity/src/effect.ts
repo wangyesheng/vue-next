@@ -57,6 +57,7 @@ function track(target: object, type: TrackOpTypes, key: PropertyKey) {
     }
 }
 
+// 找属性对应的 effect 让其执行
 function trigger(
     target: object,
     type: TriggerOpTypes,
@@ -64,15 +65,13 @@ function trigger(
     newValue: any,
     oldValue?: any
 ) {
-    debugger
+    // debugger
     const depsMap = targetMap.get(target)
     // console.log(target, type, key, newValue, oldValue, targetMap)
     if (!depsMap) return
 
     const effects = new Set
-    const add = (effectToAdd: Set<any>) => {
-        effectToAdd.forEach(effect => effects.add(effect))
-    }
+    const add = (effectToAdd: Set<any>) => effectToAdd.forEach(effect => effects.add(effect))
 
     if (isArray(target)) {
         if (key === 'length') {
@@ -90,7 +89,7 @@ function trigger(
             add(depsMap.get('length'))
         }
     } else {
-        if (key !== undefined) {
+        if (key) {
             const deps = depsMap.get(key)
             if (deps) add(deps)
         }

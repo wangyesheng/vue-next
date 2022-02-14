@@ -52,16 +52,15 @@ var VueReactivity = (function (exports) {
             deps.add(activeEffect);
         }
     }
+    // 找属性对应的 effect 让其执行
     function trigger(target, type, key, newValue, oldValue) {
-        debugger;
+        // debugger
         const depsMap = targetMap.get(target);
         // console.log(target, type, key, newValue, oldValue, targetMap)
         if (!depsMap)
             return;
         const effects = new Set;
-        const add = (effectToAdd) => {
-            effectToAdd.forEach(effect => effects.add(effect));
-        };
+        const add = (effectToAdd) => effectToAdd.forEach(effect => effects.add(effect));
         if (isArray(target)) {
             if (key === 'length') {
                 depsMap.forEach((deps, _key) => {
@@ -77,7 +76,7 @@ var VueReactivity = (function (exports) {
             }
         }
         else {
-            if (key !== undefined) {
+            if (key) {
                 const deps = depsMap.get(key);
                 if (deps)
                     add(deps);
