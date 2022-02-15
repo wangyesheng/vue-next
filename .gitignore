@@ -3,5 +3,6 @@ node_modules
 examples
 packages/*/dist
 dist/*.js
+test.js
 *.log
 .vscode

@@ -173,5 +173,40 @@ function shallowReadonly(target) {
     return createReactiveObject(target, true, shallowReadonlyHandlers);
 }
 
-export { effect, reactive, readonly, shallowReactive, shallowReadonly };
+function ref(value) {
+    return createRef(value);
+}
+function shallowRef(value) {
+    return createRef(value, true);
+}
+function createRef(rawValue, isShollow = false) {
+    return new RefImpl(rawValue, isShollow);
+}
+const convert = (value) => isObject(value) ? reactive(value) : value;
+class RefImpl {
+    rawValue;
+    isShollow;
+    _value;
+    __v_isRef = true;
+    constructor(rawValue, isShollow = false) {
+        this.rawValue = rawValue;
+        this.isShollow = isShollow;
+        this._value = isShollow ? rawValue : convert(rawValue);
+    }
+    // `class` 中的 `get` 与 `set` 等价于 `Object.defineProperty`，
+    // `Object.defineProperty` 取值与设置值的时候需要一个公用的 _value 属性来进行操作
+    get value() {
+        track(this, 0 /* GET */, 'value');
+        return this._value;
+    }
+    set value(newValue) {
+        if (newValue !== this.rawValue) {
+            this.rawValue = newValue;
+            this._value = this.isShollow ? newValue : convert(newValue);
+            trigger(this, 1 /* UPDATE */, 'value', newValue);
+        }
+    }
+}
+
+export { effect, reactive, readonly, ref, shallowReactive, shallowReadonly, shallowRef };
 //# sourceMappingURL=reactivity.esm-bundler.js.map
