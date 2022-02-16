@@ -4,6 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 const isObject = (value) => typeof value === 'object' && value != null;
 const isArray = Array.isArray;
+const isFunction = (value) => typeof value === 'function';
 const isIntegerKey = (key) => parseInt(key) + '' === key;
 const hasOwn = (target, key) => Object.prototype.hasOwnProperty.call(target, key);
 
@@ -83,7 +84,14 @@ function trigger(target, type, key, newValue, oldValue) {
                 add(deps);
         }
     }
-    effects.forEach((effect) => effect());
+    effects.forEach((effect) => {
+        if (effect.options.scheduler) {
+            effect.options.scheduler(effect);
+        }
+        else {
+            effect();
+        }
+    });
 }
 
 function createGetter(isReadonly = false, isShallow = false) {
@@ -212,6 +220,55 @@ class RefImpl {
     }
 }
 
+class ComputedRefImpl {
+    getter;
+    setter;
+    _dirty = true; // 默认取值不用缓存的
+    _value;
+    effect;
+    constructor(getter, setter) {
+        this.getter = getter;
+        this.setter = setter;
+        this.effect = effect(getter, {
+            lazy: true,
+            scheduler: () => {
+                if (!this._dirty) {
+                    this._dirty = true;
+                }
+            }
+        });
+    }
+    get value() {
+        if (this._dirty) {
+            this._value = this.effect();
+            this._dirty = false;
+        }
+        return this._value;
+    }
+    set value(newValue) {
+        this.setter(newValue);
+    }
+}
+// 1、默认不执行，当访问属性的时候执行
+// 2、依赖的值不变，不会去重新计算，一直用缓存的值
+// 3、依赖的值变了，也不会去重新计算，当再次调用该计算属性值才重新计算
+// 4、effect(()=>{},{lazy:true}) + scheduler + 缓存标志
+function computed(getterOrOptions) {
+    let getter, setter;
+    if (isFunction(getterOrOptions)) {
+        getter = getterOrOptions;
+        setter = () => {
+            console.warn('computed value must be readonly');
+        };
+    }
+    else {
+        getter = getterOrOptions.getter;
+        setter = getterOrOptions.setter;
+    }
+    return new ComputedRefImpl(getter, setter);
+}
+
+exports.computed = computed;
 exports.effect = effect;
 exports.reactive = reactive;
 exports.readonly = readonly;
