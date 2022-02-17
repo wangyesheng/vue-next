@@ -215,6 +215,31 @@ class RefImpl {
         }
     }
 }
+class ObjectRefImpl {
+    target;
+    key;
+    __v_isRef = true;
+    constructor(target, key) {
+        this.target = target;
+        this.key = key;
+    }
+    get value() {
+        return this.target[this.key];
+    }
+    set value(newValue) {
+        this.target[this.key] = newValue;
+    }
+}
+function toRef(target, key) {
+    return new ObjectRefImpl(target, key);
+}
+function toRefs(target) {
+    const result = isArray(target) ? new Array(target.length) : {};
+    for (const key in target) {
+        result[key] = toRef(target, key);
+    }
+    return result;
+}
 
 class ComputedRefImpl {
     getter;
@@ -264,5 +289,5 @@ function computed(getterOrOptions) {
     return new ComputedRefImpl(getter, setter);
 }
 
-export { computed, effect, reactive, readonly, ref, shallowReactive, shallowReadonly, shallowRef };
+export { computed, effect, reactive, readonly, ref, shallowReactive, shallowReadonly, shallowRef, toRef, toRefs };
 //# sourceMappingURL=reactivity.esm-bundler.js.map

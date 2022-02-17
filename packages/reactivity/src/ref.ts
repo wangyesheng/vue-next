@@ -1,4 +1,4 @@
-import { isObject } from "@vue/shared"
+import { isArray, isObject } from "@vue/shared"
 import { track, trigger } from "./effect"
 import { TrackOpTypes, TriggerOpTypes } from "./operators"
 import { reactive } from "./reactive"
@@ -46,7 +46,35 @@ class RefImpl {
     }
 }
 
+class ObjectRefImpl {
+    public __v_isRef = true
+
+    constructor(public target: any, public key: PropertyKey) { }
+
+    get value() {
+        return this.target[this.key]
+    }
+
+    set value(newValue) {
+        this.target[this.key] = newValue
+    }
+}
+
+function toRef(target: any, key: PropertyKey) {
+    return new ObjectRefImpl(target, key)
+}
+
+function toRefs(target: any) {
+    const result: any = isArray(target) ? new Array(target.length) : {}
+    for (const key in target) {
+        result[key] = toRef(target, key)
+    }
+    return result
+}
+
 export {
     ref,
-    shallowRef
+    shallowRef,
+    toRef,
+    toRefs
 }

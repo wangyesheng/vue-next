@@ -218,6 +218,31 @@ var VueReactivity = (function (exports) {
             }
         }
     }
+    class ObjectRefImpl {
+        target;
+        key;
+        __v_isRef = true;
+        constructor(target, key) {
+            this.target = target;
+            this.key = key;
+        }
+        get value() {
+            return this.target[this.key];
+        }
+        set value(newValue) {
+            this.target[this.key] = newValue;
+        }
+    }
+    function toRef(target, key) {
+        return new ObjectRefImpl(target, key);
+    }
+    function toRefs(target) {
+        const result = isArray(target) ? new Array(target.length) : {};
+        for (const key in target) {
+            result[key] = toRef(target, key);
+        }
+        return result;
+    }
 
     class ComputedRefImpl {
         getter;
@@ -275,6 +300,8 @@ var VueReactivity = (function (exports) {
     exports.shallowReactive = shallowReactive;
     exports.shallowReadonly = shallowReadonly;
     exports.shallowRef = shallowRef;
+    exports.toRef = toRef;
+    exports.toRefs = toRefs;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
