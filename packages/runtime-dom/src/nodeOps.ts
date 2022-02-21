@@ -12,7 +12,13 @@ export const nodeOps = {
     querySelector(selector: keyof HTMLElementTagNameMap): HTMLElement | null {
         return document.querySelector(selector)
     },
-    setElementText(el: Node, text: string | null) {
+    setElementText(el: HTMLElement, text: string | null) {
         el.textContent = text
+    },
+    createText(text: string): Text {
+        return document.createTextNode(text)
+    },
+    setText(node: Node, text: string) {
+        node.nodeValue = text
     }
 }
