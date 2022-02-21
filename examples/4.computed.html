@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
+    <script>
+        const { ref, computed, effect } = VueReactivity
+        const num = ref(1)
+        const c = computed(() => {
+            return num.value + 1
+        })
+        // step1
+        // app.innerHTML = c.value
+        // num.value = 2
+        // app.innerHTML = c.value
+
+        // step2
+        effect(() => {
+            app.innerHTML = c.value
+        })
+        num.value = 2
+
+        const App = {
+            render() {
+                console.log(this)
+            }
+        }
+
+        App.render()
+
+
+    </script>
+</body>
+
+</html>

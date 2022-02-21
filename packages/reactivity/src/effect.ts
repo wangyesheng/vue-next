@@ -63,7 +63,7 @@ function trigger(
     target: object,
     type: TriggerOpTypes,
     key: PropertyKey,
-    newValue: any,
+    newValue?: any,
     oldValue?: any
 ) {
     // debugger

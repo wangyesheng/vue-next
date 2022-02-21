@@ -1,5 +1,6 @@
 import { isFunction } from "@vue/shared";
-import { effect } from "./effect";
+import { effect, track, trigger } from "./effect";
+import { TrackOpTypes, TriggerOpTypes } from "./operators";
 
 class ComputedRefImpl {
     public _dirty = true // 默认取值不用缓存的
@@ -17,6 +18,7 @@ class ComputedRefImpl {
                 scheduler: () => {
                     if (!this._dirty) {
                         this._dirty = true
+                        trigger(this, TriggerOpTypes.UPDATE, 'value')
                     }
                 }
             }
@@ -28,6 +30,7 @@ class ComputedRefImpl {
             this._value = this.effect()
             this._dirty = false
         }
+        track(this, TrackOpTypes.GET, 'value')
         return this._value
     }
 

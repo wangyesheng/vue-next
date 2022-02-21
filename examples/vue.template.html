@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            <span>{{state.name}}</span>
+            <span>{{state.versions}}</span>
+            <span>{{computedState}}</span>
+        </div>
+        <button @click="fn">Click</button>
+    </div>
+    <script src="./vue.dev.js"></script>
+    <script>
+        const { createApp, reactive, h, computed, onMounted } = Vue
+
+        const App = {
+            setup() {
+                const state = reactive({ name: 'Hello Vue', versions: [1.0, 2.0, 3.0] })
+
+                const computedState = computed(() => {
+                    return state.versions.map(v => v * 2)
+                })
+
+                const fn = () => {
+                    state.name = 'Hello World'
+                    state.versions.push(4.0)
+                }
+
+                onMounted(() => {
+                    setTimeout(() => {
+                        state.versions.push(5.0)
+                    }, 3000)
+                })
+
+                return {
+                    state,
+                    fn,
+                    computedState
+                }
+            }
+        }
+
+        createApp(App).mount(app)
+    </script>
+</body>
+
+</html>

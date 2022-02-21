@@ -259,6 +259,7 @@ class ComputedRefImpl {
             scheduler: () => {
                 if (!this._dirty) {
                     this._dirty = true;
+                    trigger(this, 1 /* UPDATE */, 'value');
                 }
             }
         });
@@ -268,6 +269,7 @@ class ComputedRefImpl {
             this._value = this.effect();
             this._dirty = false;
         }
+        track(this, 0 /* GET */, 'value');
         return this._value;
     }
     set value(newValue) {

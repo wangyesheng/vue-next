@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-examples
+# examples
 packages/*/dist
 dist/*.js
 test.js
