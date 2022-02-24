@@ -1,22 +1,22 @@
-export const patchEvent = (el: any, key: string, value: any) => {
+export const patchEvent = (el: Element & { _vei?: any }, key: string, value: any) => {
     const invokers = el._vei || (el._vei = {})
-    const exists = invokers[key]
-    if (value && exists) {
-        exists.value = value
+    const existsInvoker = invokers[key]
+    if (value && existsInvoker) {
+        existsInvoker.value = value
     } else {
         const eventName: keyof HTMLElementEventMap | string = key.slice(2).toLocaleLowerCase()
         if (value) {
-            const invoker = invokers[eventName] = createInvoker(value)
+            const invoker = invokers[key] = createInvoker(value)
             el.addEventListener(eventName, invoker)
         } else {
-            (el as HTMLElement).removeEventListener(eventName, exists)
-            invokers[eventName] = undefined
+            el.removeEventListener(eventName, existsInvoker)
+            invokers[key] = undefined
         }
     }
 }
 
 function createInvoker(value: any): any {
-    const invoker = (e: any) => {
+    const invoker = (e: MouseEvent) => {
         invoker.value(e)
     }
     invoker.value = value

@@ -1,7 +1,2 @@
-export {
-    nodeOps
-} from './nodeOps'
+export { createApp } from "./createApp";
 
-export {
-    patchProp
-} from './patchProp'

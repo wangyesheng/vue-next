@@ -12,38 +12,87 @@
     <div id="app" />
     <script src="./vue.dev.js"></script>
     <script>
-        const { createApp, reactive, h, computed, onMounted } = Vue
 
-        const App = {
-            props: ['style'],
-
-            setup(props, ctx) {
-                const state = reactive({ name: 'Hello Vue', versions: [1.0, 2.0, 3.0] })
-
-                const computedState = computed(() => {
-                    return state.versions.map(v => v * 2)
-                })
-
-                const fn = () => {
-                    state.name = 'Hello World'
-                    state.versions.push(4.0)
-                }
-
-                onMounted(() => {
-                    setTimeout(() => {
-                        state.age = 18
-                    }, 3000)
-                })
-
-                return () => h(
-                    'div',
-                    { style: props.style, onClick: fn },
-                    `${state.name},${state.versions},${computedState.value},${state.age ? state.age : ''}`
-                )
-            }
+        app._vei = {
+            fn: () => { }
         }
 
-        createApp(App, { style: { color: '#1890ff' } }).mount(app)
+        console.log(app._vei)
+
+        // const { createApp, reactive, h, computed, onMounted, watch } = Vue
+
+        // const App = {
+        //     props: ['style'],
+
+        //     setup(props, ctx) {
+        //         const state = reactive({ name: 'Hello Vue', versions: [1.0, 2.0, 3.0] })
+
+        //         const computedState = computed(() => {
+        //             return state.versions.map(v => v * 2)
+        //         })
+
+        //         const fn = () => {
+        //             state.name = 'Hello World'
+        //             state.versions.push(4.0)
+        //         }
+
+        //         onMounted(() => {
+        //             setTimeout(() => {
+        //                 state.age = 18
+        //             }, 3000)
+        //         })
+
+        //         return () => h(
+        //             'div',
+        //             { style: props.style, onClick: fn },
+        //             `${state.name},${state.versions},${computedState.value},${state.age ? state.age : ''}`
+        //         )
+        //     }
+        // }
+
+        // const App = {
+        //     props: ['style'],
+
+        //     setup(props) {
+        //         const state = reactive({ value: 10 })
+
+        //         const rawState = { value: 1 }
+
+        //         const computedState1 = computed(() => {
+        //             console.log('init computedState1')
+        //             return state.value + 10
+        //         })
+
+
+        //         const computedState2 = computed(() => {
+        //             console.log('init computedState2')
+        //             return rawState.value + 10
+        //         })
+
+        //         const fn = () => {
+        //             state.value = 100
+        //             rawState.value = 10
+        //         }
+
+        //         return () => {
+        //             return h(
+        //                 'div',
+
+        //                 { style: props.style, onClick: fn },
+
+        //                 `reactiveState: ${state.value}
+        //                     -
+        //                         rawState: ${rawState.value}
+        //                             -
+        //                                 computedState1: ${computedState1.value}
+        //                                     -
+        //                                         computedState2: ${computedState2.value}`
+        //             )
+        //         }
+        //     }
+        // }
+
+        // createApp(App, { style: { color: '#1890ff' } }).mount(app)
     </script>
 </body>
 

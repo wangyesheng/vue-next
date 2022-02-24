@@ -12,33 +12,48 @@
     <div id="app"></div>
     <script src="../node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
     <script>
-        const { ref, computed, effect } = VueReactivity
+        const { ref, reactive, computed, effect } = VueReactivity
+
+        // debugger
+
         const num = ref(1)
         const c = computed(() => {
             return num.value + 1
         })
         // step1
-        // app.innerHTML = c.value
-        // num.value = 2
-        // app.innerHTML = c.value
-
-        // step2
-        effect(() => {
-            app.innerHTML = c.value
-        })
+        app.innerHTML = c.value
         num.value = 2
+        app.innerHTML = c.value
 
-        const App = {
-            render() {
-                console.log(this)
-            }
-        }
+        // // step2
+        // effect(() => {
+        //     app.innerHTML = c.value
+        // })
+        // num.value = 2
 
-        App.render()
+        // const App = {
+        //     render() {
+        //         console.log(this)
+        //     }
+        // }
+
+        // App.render()
 
         // app.appendChild(document.createTextNode('text'))
         // app.nodeValue = 111
-        app.className = ''
+        // app.className = ''
+
+
+        /* *
+         * 1、依赖响应式数据
+         * 2、默认调用 computed 函数，内部返回一个 ComputedRefImpl 实例，
+         *    在构造函数中创建 effect 函数，该函数默认不执行，
+         *    并且绑定一个调度器函数用于将内部的 dirty 属性置为 true 以及触发更新
+         * 3、
+         * 
+         * 
+         * 
+         * */
 
 
     </script>
