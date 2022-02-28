@@ -1,3 +1,5 @@
+import { ShapeFlags } from "./shapeFlag"
+
 const isObject = (value: any) => typeof value === 'object' && value != null
 const isArray = Array.isArray
 const isFunction = (value: any) => typeof value === 'function'
@@ -13,5 +15,6 @@ export {
     isNumber,
     isString,
     isIntegerKey,
-    hasOwn
+    hasOwn,
+    ShapeFlags
 }

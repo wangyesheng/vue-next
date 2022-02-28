@@ -16,13 +16,18 @@
         const { createApp } = VueRuntimeDOM
 
         const App = {
-            render() {
-                console.log('render')
+            setup(props, ctx) {
+                console.log('setup', props, ctx)
+                return {
+                    a: 1
+                }
+            },
+            render(proxy) {
+                console.log('render', proxy.a, proxy.b, proxy.style.c)
             }
         }
 
-        createApp(App, { style: {} }).mount(app)
-
+        createApp(App, { style: { c: 3 } }).mount(app)
     </script>
 </body>
 
