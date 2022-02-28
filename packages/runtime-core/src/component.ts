@@ -1,4 +1,4 @@
-import { ShapeFlags } from "@vue/shared";
+import { isFunction, isObject, ShapeFlags } from "@vue/shared";
 import { PublicComponentInstanceHandler } from "./componentPublicInstance";
 import { IVNode } from "./vnode";
 
@@ -53,13 +53,38 @@ export function setupComponent(instance: IComponentInstance) {
 function setupStatefulComponent(instance: IComponentInstance) {
     // 1. 代理传递给 render 函数的参数
     const instanceProxy = new Proxy(instance.ctx, PublicComponentInstanceHandler as any)
-
     // 2. 获取组件的类型 拿到组件的 setup 方法 
     const Component = instance.type
-    const { setup, render } = Component
-    const setupContext = createSetupContext(instance)
-    instance.setupState = setup(instance.props, setupContext)
-    render && render(instanceProxy)
+    const { setup } = Component
+    if (setup) {
+        const setupContext = createSetupContext(instance)
+        const setupResult = setup(instance.props, setupContext)
+        handleSetupRequest(instance, setupResult)
+    } else {
+        finishComponentSetup(instance)
+    }
+}
+
+function handleSetupRequest(instance: IComponentInstance, setupResult: any) {
+    if (isFunction(setupResult)) {
+        // setup 返回的 render 函数
+        instance.render = setupResult
+    } else if (isObject(setupResult)) {
+        instance.setupState = setupResult()
+    }
+
+    finishComponentSetup(instance)
+}
+
+function finishComponentSetup(instance: IComponentInstance) {
+    const Component = instance.type
+    if (!instance.render) {
+        // 对 template 模板进行编译，产生 render 函数
+        if (!Component.render && Component.template) {
+            // 编译模板，将结果赋值给 Component.render 函数
+        }
+        instance.render = Component.render
+    }
 }
 
 function createSetupContext(instance: IComponentInstance) {

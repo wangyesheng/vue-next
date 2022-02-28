@@ -1,9 +1,8 @@
 import { hasOwn } from "@vue/shared"
-import { IComponentInstance } from "./component"
 
 export const PublicComponentInstanceHandler = {
-    get({ _: instance }: any, key: PropertyKey, receiver: any) {
-        if ((key as string).startsWith('$')) {
+    get({ _: instance }: any, key: string, receiver: any) {
+        if (key.startsWith('$')) {
             console.warn(`Can't read properties starting with $`)
             return
         }
@@ -14,11 +13,16 @@ export const PublicComponentInstanceHandler = {
             return Reflect.get(props, key, receiver)
         } else if (hasOwn(data, key)) {
             return Reflect.get(data, key, receiver)
-        } else {
-            return undefined
         }
     },
-    set(target: any, key: PropertyKey, value: any, receiver: any) {
-        Reflect.set(target, key, value, receiver)
+    set({ _: instance }: any, key: string, value: any, receiver: any) {
+        const { setupState, props, data } = instance
+        if (hasOwn(setupState, key)) {
+            Reflect.set(setupState, key, value, receiver)
+        } else if (hasOwn(props, key)) {
+            Reflect.set(props, key, value, receiver)
+        } else if (hasOwn(data, key)) {
+            Reflect.set(data, key, value, receiver)
+        }
     }
 }
