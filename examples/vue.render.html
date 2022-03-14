@@ -12,43 +12,48 @@
     <div id="app" />
     <script src="./vue.dev.js"></script>
     <script>
+        const { createApp, reactive, h, computed } = Vue
 
-        app._vei = {
-            fn: () => { }
+        const Child = {
+            props: ['first', 'versions'],
+            setup(props) {
+                setTimeout(() => {
+                    props.versions.first.push(4)
+                }, 2000);
+                return () => {
+                    return h('span', {}, `Child-${props.versions.first}`)
+                }
+            }
         }
 
-        console.log(app._vei)
+        const App = {
+            props: ['style'],
 
-        // const { createApp, reactive, h, computed, onMounted, watch } = Vue
+            setup(props, ctx) {
+                const state = reactive({
+                    name: 'App ', versions: {
+                        first: [1.0, 2.0, 3.0],
+                        two: [1.0, 2.0, 3.0],
+                        third: [1.0, 2.0, 3.0]
+                    }
+                })
+                setTimeout(() => {
+                    // state.versions.first.push(4)
+                    state.name = 'eos'
+                }, 2000);
 
-        // const App = {
-        //     props: ['style'],
-
-        //     setup(props, ctx) {
-        //         const state = reactive({ name: 'Hello Vue', versions: [1.0, 2.0, 3.0] })
-
-        //         const computedState = computed(() => {
-        //             return state.versions.map(v => v * 2)
-        //         })
-
-        //         const fn = () => {
-        //             state.name = 'Hello World'
-        //             state.versions.push(4.0)
-        //         }
-
-        //         onMounted(() => {
-        //             setTimeout(() => {
-        //                 state.age = 18
-        //             }, 3000)
-        //         })
-
-        //         return () => h(
-        //             'div',
-        //             { style: props.style, onClick: fn },
-        //             `${state.name},${state.versions},${computedState.value},${state.age ? state.age : ''}`
-        //         )
-        //     }
-        // }
+                return () => h(
+                    'div',
+                    { style: props.style },
+                    h('div', {}, [
+                        h('div', {}, [
+                            `Parent-${state.name}`,
+                            h(Child, { versions: state.versions })
+                        ]),
+                    ])
+                )
+            }
+        }
 
         // const App = {
         //     props: ['style'],
@@ -92,7 +97,7 @@
         //     }
         // }
 
-        // createApp(App, { style: { color: '#1890ff' } }).mount(app)
+        createApp(App, { style: { color: '#1890ff' } }).mount(app)
     </script>
 </body>
 

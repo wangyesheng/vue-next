@@ -13,6 +13,7 @@ export interface IComponentInstance {
     setupState: any, // setup 函数的返回值
     data: any, // options api data
     ctx: any,
+    proxy: any, // render 函数的 proxy 参数
     isMounted: boolean, // 组件是否挂载过 
 }
 
@@ -30,6 +31,7 @@ export function createComponentInstance(vnode: IVNode) {
             b: 2
         },
         ctx: {},
+        proxy: {},
         isMounted: false, // 组件是否挂载过 
     }
     instance.ctx = { _: instance }
@@ -52,25 +54,26 @@ export function setupComponent(instance: IComponentInstance) {
 
 function setupStatefulComponent(instance: IComponentInstance) {
     // 1. 代理传递给 render 函数的参数
-    const instanceProxy = new Proxy(instance.ctx, PublicComponentInstanceHandler as any)
+    instance.proxy = new Proxy(instance.ctx, PublicComponentInstanceHandler as any)
+
     // 2. 获取组件的类型 拿到组件的 setup 方法 
     const Component = instance.type
     const { setup } = Component
     if (setup) {
         const setupContext = createSetupContext(instance)
         const setupResult = setup(instance.props, setupContext)
-        handleSetupRequest(instance, setupResult)
+        handleSetupResult(instance, setupResult)
     } else {
         finishComponentSetup(instance)
     }
 }
 
-function handleSetupRequest(instance: IComponentInstance, setupResult: any) {
+function handleSetupResult(instance: IComponentInstance, setupResult: any) {
     if (isFunction(setupResult)) {
         // setup 返回的 render 函数
         instance.render = setupResult
     } else if (isObject(setupResult)) {
-        instance.setupState = setupResult()
+        instance.setupState = setupResult
     }
 
     finishComponentSetup(instance)
@@ -84,6 +87,9 @@ function finishComponentSetup(instance: IComponentInstance) {
             // 编译模板，将结果赋值给 Component.render 函数
         }
         instance.render = Component.render
+    }
+    if (!instance.render) {
+        return
     }
 }
 

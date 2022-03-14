@@ -1,6 +1,7 @@
+import { effect } from "@vue/reactivity"
 import { ShapeFlags } from "@vue/shared"
 import { createAppAPI } from "./apiCreateApp"
-import { createComponentInstance, setupComponent } from "./component"
+import { createComponentInstance, IComponentInstance, setupComponent } from "./component"
 import { IVNode } from "./vnode"
 
 /**
@@ -9,7 +10,18 @@ import { IVNode } from "./vnode"
  * @returns 创建的应用 App 
  */
 export function createRenderer(rendererOptions: any) {
-    const setupRenderEffect = () => { }
+    const setupRenderEffect = (instance: IComponentInstance) => {
+        // 每个组件都有一个 effect，组件级更新
+        effect(function componentEffcet() {
+            if (!instance.isMounted) {
+                // 初次渲染
+                const proxyToUse = instance.proxy
+                instance.render.call(null, proxyToUse)
+                instance.isMounted = true
+            }
+        })
+        instance.render()
+    }
 
     const mountComponent = (initVNode: IVNode, container: any) => {
         // 组件渲染流程，最核心的就是调用 setup 拿到返回值，获取 render 函数返回结果来进行渲染
@@ -21,7 +33,7 @@ export function createRenderer(rendererOptions: any) {
         setupComponent(instance)
 
         // 3. 创建 effect 让 render 函数执行
-        setupRenderEffect()
+        setupRenderEffect(instance)
     }
 
     const processComponent = (n1: IVNode | null, n2: IVNode, container: any) => {
