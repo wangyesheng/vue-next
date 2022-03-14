@@ -3,7 +3,7 @@ import { TrackOpTypes, TriggerOpTypes } from "./operators"
 
 interface IEffectOptions {
     lazy?: boolean,
-    scheduler?: () => void
+    scheduler?: (p1: any) => void
 }
 
 // vue2.0 watcher

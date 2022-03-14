@@ -12,7 +12,7 @@
     <div id="app" />
     <script src="./vue.dev.js"></script>
     <script>
-        const { createApp, reactive, h, computed } = Vue
+        const { createApp, reactive, h, computed, toRefs } = Vue
 
         const Child = {
             props: ['first', 'versions'],
@@ -21,7 +21,7 @@
                     props.versions.first.push(4)
                 }, 2000);
                 return () => {
-                    return h('span', {}, `Child-${props.versions.first}`)
+                    return h('span', {}, `Child`, `-`, `${props.versions.first}`)
                 }
             }
         }
@@ -42,13 +42,19 @@
                     state.name = 'eos'
                 }, 2000);
 
-                return () => h(
+                return {
+                    ...toRefs(state)
+                }
+            },
+
+            render(proxy) {
+                return h(
                     'div',
-                    { style: props.style },
+                    { style: proxy.style },
                     h('div', {}, [
                         h('div', {}, [
-                            `Parent-${state.name}`,
-                            h(Child, { versions: state.versions })
+                            `Parent-${proxy.name}`,
+                            h(Child, { versions: proxy.versions })
                         ]),
                     ])
                 )

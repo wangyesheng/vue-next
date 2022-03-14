@@ -13,20 +13,24 @@
 
     <script src="../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script>
     <script>
-        const { createApp } = VueRuntimeDOM
+        const { createApp, h, reactive } = VueRuntimeDOM
 
         const App = {
             setup(props, ctx) {
-                return {
-                    a: 1
+                const state = reactive({ text: 'world' })
+                const fn = () => {
+                    state.text = 'vue'
+                    state.text = 'world'
+                    state.text = 'vue'
+                    state.text = 'world'
                 }
-            },
-            render(proxy) {
-                console.log('render')
+                return () => {
+                    return h('div', { style: props.style, onClick: fn }, ['hello', h('span', {}, `${state.text}`)])
+                }
             }
         }
 
-        createApp(App, { style: { color: '#1890ff' } }).mount(app)
+        createApp(App, { style: { color: '#1890ff', 'fontSize': '28px' } }).mount(app)
     </script>
 </body>
 

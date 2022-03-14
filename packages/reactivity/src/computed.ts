@@ -15,7 +15,7 @@ class ComputedRefImpl {
             getter,
             {
                 lazy: true,
-                scheduler: () => {
+                scheduler: (effect) => {
                     if (!this._dirty) {
                         this._dirty = true
                         trigger(this, TriggerOpTypes.UPDATE, 'value')

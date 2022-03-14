@@ -255,7 +255,7 @@ var VueReactivity = (function (exports) {
             this.setter = setter;
             this.effect = effect(getter, {
                 lazy: true,
-                scheduler: () => {
+                scheduler: (effect) => {
                     if (!this._dirty) {
                         this._dirty = true;
                         trigger(this, 1 /* UPDATE */, 'value');
