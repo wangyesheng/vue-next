@@ -15,6 +15,7 @@ export interface IComponentInstance {
     ctx: any,
     proxy: any, // render 函数的 proxy 参数
     isMounted: boolean, // 组件是否挂载过 
+    subTree?: any
 }
 
 export function createComponentInstance(vnode: IVNode) {

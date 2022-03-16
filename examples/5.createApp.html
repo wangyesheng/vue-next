@@ -13,24 +13,23 @@
 
     <script src="../node_modules/@vue/runtime-dom/dist/runtime-dom.global.js"></script>
     <script>
-        const { createApp, h, reactive } = VueRuntimeDOM
+        const { createApp, h, reactive, ref } = VueRuntimeDOM
 
         const App = {
             setup(props, ctx) {
-                const state = reactive({ text: 'world' })
-                const fn = () => {
-                    state.text = 'vue'
-                    state.text = 'world'
-                    state.text = 'vue'
-                    state.text = 'world'
-                }
+                const flag = ref(true)
+                setTimeout(() => {
+                    flag.value = false
+                }, 1000);
                 return () => {
-                    return h('div', { style: props.style, onClick: fn }, ['hello', h('span', {}, `${state.text}`)])
+                    // return flag.value ? h('div', { style: props.style }, [h('div', 'kitty'), 'hello',]) : h('p', { style: { color: '#ff0000' } }, [h('p', 'tom'), 'hello',])
+                    // return flag.value ? h('div', { style: { ...props.style, } }, [h('div'),'tick']) : h('div', { style: { color: '#ff0000', fontSize: '58px' } }, [h('div','hello'),'tom'])
+                    return flag.value ? h('div', { style: { ...props.style, } }, 'hello') : h('div', { style: { color: '#ff0000', fontSize: '58px' } }, 'kitty')
                 }
             }
         }
 
-        createApp(App, { style: { color: '#1890ff', 'fontSize': '28px' } }).mount(app)
+        createApp(App, { style: { color: '#1890ff', 'fontSize': '28px', textAlign: 'center' } }).mount(app)
     </script>
 </body>
 

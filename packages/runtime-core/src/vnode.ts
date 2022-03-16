@@ -16,6 +16,10 @@ export function isVNode(vnode: IVNode) {
     return vnode.__v_isVnode
 }
 
+export function isSameVNode(n1: IVNode, n2: IVNode) {
+    return n1.type === n2.type && n1.key === n2.key
+}
+
 export function createVNode(type: any, props: any, children: any[] | string | null = null) {
     // 根据 type 来区分是组件还是普通元素
     const shapeFlag =
@@ -59,3 +63,4 @@ export function normalizeVNode(vnode: number | string | IVNode): IVNode {
     if (isObject(vnode)) return vnode as IVNode
     return createVNode(Text, null, String(vnode))
 }
+
